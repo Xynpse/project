@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'todoapp:todo-list' %}">Todo App</a>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <div class="row mb-4">
+            <div class="col">
+                <h2>Todo List</h2>
+            </div>
+            <div class="col text-end">
+                <a href="{% url 'todoapp:todo-create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Todo
+                </a>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="search" class="form-control" placeholder="Search todos..." value="{{ request.GET.search }}">
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-select">
+                            <option value="">All Status</option>
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="sort" class="form-select">
+                            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                            <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+                            <option value="due_date" {% if request.GET.sort == 'due_date' %}selected{% endif %}>Due Date</option>
+                            <option value="title" {% if request.GET.sort == 'title' %}selected{% endif %}>Title</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="row">
+            {% for todo in todos %}
+                <div class="col-md-6 mb-4">
+                    <div class="card {% if todo.is_overdue %}border-danger{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <h5 class="card-title">{{ todo.title }}</h5>
+                                <span class="badge {% if todo.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">{{ todo.get_status_display }}</span>
+                            </div>
+                            <p class="card-text">{{ todo.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    Due: {{ todo.due_date|date:"M d, Y" }}
+                                    {% if todo.is_overdue %}<span class="text-danger">(Overdue)</span>{% endif %}
+                                </small>
+                                <div class="btn-group">
+                                    <a href="{% url 'todoapp:todo-update' todo.pk %}" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'todoapp:todo-delete' todo.pk %}" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col">
+                    <div class="alert alert-info">No todos found. Create your first todo!</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
